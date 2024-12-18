@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 // decrypt encrypted message
 export const decryptMessage = (encryptedMessage, passphrase) => {
 

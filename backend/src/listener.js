@@ -10,6 +10,8 @@ export const processMessage = (messageStream) => {
 
     const encryptedMessages = messageString.split('|');
 
+    let validatedMessage = [];
+
     encryptedMessages.forEach((encryptedMessage) => {
         console.log("Loop enc Message: " + encryptedMessage);
         try {
@@ -22,6 +24,7 @@ export const processMessage = (messageStream) => {
                 console.log("Valid Message:  " + decryptedMessage);
 
                 // TODO: Stream Messages to Frontend
+                validateMessage.push(decryptMessage);
 
             } else {
                 console.error('Invalid message integrity. Skipping this message.');
@@ -30,4 +33,6 @@ export const processMessage = (messageStream) => {
             console.error('Error processing message:', error);
         }
     });
+
+    return validateMessage;
 }
