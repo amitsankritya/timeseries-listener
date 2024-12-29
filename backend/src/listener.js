@@ -13,9 +13,11 @@ export const processMessage = (messageStream) => {
     let validatedMessage = [];
 
     encryptedMessages.forEach((encryptedMessage) => {
-        console.log("Loop enc Message: " + encryptedMessage);
+
         try {
-    
+            
+            console.log("Passphrase :" + process.env.PASSPHRASE);
+
             const decryptedMessage = decryptMessage(encryptedMessage, process.env.PASSPHRASE);
 
             if (validateMessage(decryptedMessage)) {
@@ -23,8 +25,7 @@ export const processMessage = (messageStream) => {
                 // TODO: save messages to influx db
                 console.log("Valid Message:  " + decryptedMessage);
 
-                // TODO: Stream Messages to Frontend
-                validateMessage.push(decryptMessage);
+                validatedMessage.push(decryptedMessage);
 
             } else {
                 console.error('Invalid message integrity. Skipping this message.');
@@ -34,5 +35,5 @@ export const processMessage = (messageStream) => {
         }
     });
 
-    return validateMessage;
+    return validatedMessage;
 }

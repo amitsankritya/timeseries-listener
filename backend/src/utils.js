@@ -25,6 +25,8 @@ export const decryptMessage = (encryptedMessage, passphrase) => {
 // validate the message using the secret_key
 export const validateMessage = (message) => {
     console.log(message);
+    const messageSecretKey = message.secret_key;
+    delete message.secret_key;
     const calculatedSecretKey = crypto.createHash('sha256').update(JSON.stringify(message)).digest('hex');
-    return message.secret_key === calculatedSecretKey;
+    return messageSecretKey === calculatedSecretKey;
 };

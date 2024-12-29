@@ -11,6 +11,7 @@ const WebSocketClient = ({ onNewMessage }) => {
     };
 
     socket.onmessage = (event) => {
+      console.log(event.data);
       const message = JSON.parse(event.data);
       onNewMessage(message);
     };

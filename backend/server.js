@@ -5,45 +5,53 @@ import { processMessage } from "./src/listener.js";
 
 dotenv.config();
 
-const emitterSocket = new WebSocket('wss://localhost:3030');
+const frontendSocket = new WebSocketServer({ port: 4000 });
 
-let frontendSocket = null;
+let frontendClients = [];
 
-const connectToFrontend = () => {
-    frontendSocket = new WebSocketServer({ port: 4000 });
+frontendSocket.on('connection', (fws) => {
 
-    frontendSocket.on('open', () => {
-        console.log('Connected to frontend service');
+    console.log('Frontend WebSocket connected');
+    frontendClients.push(fws);
+
+    fws.on('close', () => {
+        frontendClients = frontendClients.filter(client => client !== fws);
     });
 
-    frontendSocket.on('error', (error) => {
+    fws.on('message', (message) => {
+        console.log('Received from frontend:', message);
+    });
+
+    fws.on('error', (error) => {
         console.log('Frontend WebSocket Error:', error);
     });
-};
-
-connectToFrontend();
+});
 
 const broadcastToFrontend = (validMessages) => {
-    console.log(frontendSocket.readyState);
-    if (frontendSocket && frontendSocket.readyState === WebSocket.OPEN) {
-
-        frontendSocket.send(JSON.stringify(validMessages));
-
-    } else {
-        console.log('Frontend WebSocket is not open');
-    }
+    frontendClients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+            console.log("Sending message to client...");
+            client.send(JSON.stringify(validMessages));
+        } else {
+            console.log('Frontend WebSocket is not open');
+        }
+    });
 };
+
+const emitterSocket = new WebSocket('wss://localhost:3030');
 
 emitterSocket.on('open', () => {
     console.log('Connected to timeseries emitter service');
 });
 
 emitterSocket.on('message', (messageStream) => {
-    console.log(`Message Recieved: ${messageStream}`);
 
     const validMessages = processMessage(messageStream);
 
+    console.log(`Message Recieved: ${validMessages}`);
+
     broadcastToFrontend(validMessages);
+
 });
 
 emitterSocket.on('error', (error) => {
